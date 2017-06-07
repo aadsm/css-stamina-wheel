@@ -1,0 +1,480 @@
+<!doctype html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CSS Stamina Wheel</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Verdana;
+    }
+
+    h2 {
+      margin-top: 4px;
+      margin-bottom: 0;
+      margin-left: 8px;
+    }
+
+    .options {
+      display: none;
+      padding: 8px;
+      color: white;
+      background-color: black;
+      font-size: large;
+    }
+
+    .options input {
+      margin-left: 8px;
+      margin-right: 12px;
+    }
+
+    .main {
+      text-align: center;
+    }
+
+    .wheel-1,
+    .wheel-2 {
+      position: absolute;
+    }
+
+    .hide {
+      display: none;
+    }
+
+    .info-panel {
+      position: absolute;
+      width: 100%;
+    }
+
+    .info-container {
+      margin-left: auto;
+      margin-right: auto;
+      width: 320px;
+      text-align: left;
+      padding: 4px;
+    }
+
+    #info-icon {
+      font-size: x-large;
+    }
+  </style>
+</head>
+<body>
+  <div class="options">
+    Color: <input id="color" type="color" value="#4CAF50">
+    <nobr>Size:<input id="size" type="range" min="30" max="100" value="80"></nobr>
+    <nobr>Speed:<input id="speed" type="range" min="2" max="89" value="25"></nobr>
+  </div>
+
+  <div class="info-panel hide">
+    <div class="info-container">
+      <a href="#" id="back-icon">back</a>
+      <p>
+        CSS Stamina Wheel is inspired by Zelda's Breath of the Wild.
+      </p>
+      <p>
+        It's a pure CSS implementation using CSS Animations, var, calc and round corners.
+        The little JS it has is only meant for switching between 2D and 3D versions and also to prevent copy pasting of code.
+      </p>
+      <p>
+        Developed by <a href="http://github.com/aadsm">aadsm</a>.
+      </p>
+    </div>
+  </div>
+
+  <div class="main">
+    <h2><a href="#" id="info-icon">&#9432;</a> CSS Stamina Wheel</h2>
+    (hover or tap to start)
+
+    <div class="stamina-wheel-container" onclick="">
+      <div class="twoD-container">
+        <div class="wheel-1"></div>
+        <div class="wheel-2"></div>
+      </div>
+      <div class="threeD-container">
+        <div class="wheel-3d"></div>
+      </div>
+    </div>
+    <a href="#" id="show-3d-model">Show 3D model of outer disc</a>
+    <a href="#" id="show-wheel" class="hide">Show Wheel</a>
+  </div>
+
+  <template id="stamina-wheel-template">
+    <div class="wheel-container">
+      <div class="wheel">
+        <div class="wheel-base"></div>
+        <div class="wheel-burn"></div>
+        <div class="wheel-fill"></div>
+        <div class="wheel-sleeve"></div>
+      </div>
+    </div>
+  </template>
+
+  <style>
+    .wheel-container {
+      --wheel-color: #4CAF50;
+      --wheel-width: 150px;
+      --wheel-hole-width: 50px;
+      --step: 1;
+      --speed: 25;
+    }
+
+    .wheel {
+      --fill-color: black;
+      --burn-start-color: orange;
+      --burn-end-color: red;
+      --burn-size: calc(var(--speed) * 1deg);
+      --burn-rate: calc(1ms * (1000 + ((90 - var(--speed)) * 70)));
+      --wheel-border-width: calc(
+        (var(--wheel-width) - var(--wheel-hole-width)) / 2
+      );
+      width: var(--wheel-width);
+      height: var(--wheel-width);
+      display: inline-block;
+    }
+
+    .wheel-container {
+      display: table-cell;
+      vertical-align: middle;
+      text-align: center;
+      width: 200px;
+      height: 200px;
+    }
+
+    .threeD-container.animate .wheel-container {
+      transform: rotate3d(-1, -1, 0, 30deg) translateX(28px) translateY(-20px);
+      transform-style: preserve-3d;
+      transition-property: transform;
+      transition-delay: 200ms;
+      transition-duration: 1.4s;
+    }
+
+    .wheel-base,
+    .wheel-sleeve,
+    .wheel-fill,
+    .wheel-burn {
+      position: absolute;
+      width: var(--wheel-hole-width);
+      height: var(--wheel-hole-width);
+      border-radius: calc(var(--wheel-width) / 2);
+      border-width: var(--wheel-border-width);
+    }
+
+    .wheel-base {
+      border: var(--wheel-border-width) solid var(--wheel-color);
+      transform: rotate(45deg);
+    }
+
+    .wheel-sleeve {
+      border: var(--wheel-border-width) solid transparent;
+      border-top-color: var(--wheel-color);
+      border-left-color: var(--wheel-color);
+      transform: rotate(-45deg);
+    }
+
+    .threeD-container .wheel-sleeve {
+      transform: rotate(-45deg) translateZ(150px);
+    }
+
+    .wheel-fill {
+      border: var(--wheel-border-width) solid transparent;
+      border-top-color: var(--fill-color);
+      transform: rotate(calc(-45deg - var(--burn-size)));
+    }
+
+    .threeD-container .wheel-fill {
+      transform: rotate(calc(-45deg - var(--burn-size))) translateZ(100px);
+    }
+
+    .wheel-burn {
+      border: var(--wheel-border-width) solid transparent;
+      border-top-color: var(--burn-start-color);
+      transform: rotate(-45deg);
+    }
+
+    .threeD-container .wheel-burn {
+      transform: rotate(calc(-45deg - var(--burn-size))) translateZ(100px);
+      transform: rotate(-45deg) translateZ(50px);
+    }
+
+    .stamina-wheel-container:hover .wheel-fill {
+      animation: burn-wheel var(--burn-rate) linear;
+      animation-delay: calc((var(--step) - 1) * var(--burn-rate));
+      animation-fill-mode: forwards;
+    }
+
+    .stamina-wheel-container:hover .threeD-container .wheel-fill {
+      animation: burn-wheel-3d var(--burn-rate) linear;
+      animation-delay: calc((var(--step) - 1) * var(--burn-rate));
+      animation-fill-mode: forwards;
+    }
+
+    .stamina-wheel-container:hover .wheel-base {
+      animation: fill-wheel var(--burn-rate);
+      animation-delay: calc((var(--step) - 1) * var(--burn-rate));
+      animation-fill-mode: forwards;
+      animation-timing-function: cubic-bezier(1,0,1,0);
+    }
+
+    .stamina-wheel-container:hover .wheel-sleeve {
+      animation: hide-sleeve var(--burn-rate);
+      animation-delay: calc((var(--step) - 1) * var(--burn-rate));
+      animation-fill-mode: forwards;
+      animation-timing-function: cubic-bezier(1,0,1,0);
+    }
+
+    .stamina-wheel-container:hover .wheel-burn {
+      animation:
+        burning-wheel var(--burn-rate) linear forwards,
+        burning-color 150ms linear alternate infinite;
+      animation-delay: calc((var(--step) - 1) * var(--burn-rate));
+    }
+
+    .stamina-wheel-container:hover .threeD-container .wheel-burn {
+      animation:
+        burning-wheel-3d var(--burn-rate) linear forwards,
+        burning-color 150ms linear alternate infinite;
+      animation-delay: calc((var(--step) - 1) * var(--burn-rate));
+    }
+
+    @keyframes burning-wheel {
+      0% {
+        transform: rotate(-45deg);
+      }
+
+      25% {
+        transform: rotate(45deg);
+      }
+
+      50% {
+        transform: rotate(135deg);
+      }
+
+      75% {
+        transform: rotate(225deg);
+      }
+
+      100% {
+        transform: rotate(calc(315deg + var(--burn-size)));
+      }
+    }
+
+    @keyframes burning-wheel-3d {
+      0% {
+        transform: rotate(-45deg) translateZ(50px);
+      }
+
+      25% {
+        transform: rotate(45deg) translateZ(50px);
+      }
+
+      50% {
+        transform: rotate(135deg) translateZ(50px);
+      }
+
+      75% {
+        transform: rotate(225deg) translateZ(50px);
+      }
+
+      100% {
+        transform: rotate(calc(315deg + var(--burn-size))) translateZ(50px);
+      }
+    }
+
+    @keyframes burn-wheel {
+      0% {
+        transform: rotate(calc(-45deg - var(--burn-size)));
+      }
+
+      25% {
+        transform: rotate(calc(45deg - var(--burn-size)));
+      }
+
+      50% {
+        transform: rotate(calc(135deg - var(--burn-size)));
+      }
+
+      75% {
+        transform: rotate(calc(225deg - var(--burn-size)));
+      }
+
+      100% {
+        transform: rotate(315deg);
+      }
+    }
+
+    @keyframes burn-wheel-3d {
+      0% {
+        transform: rotate(calc(-45deg - var(--burn-size))) translateZ(100px);
+      }
+
+      25% {
+        transform: rotate(calc(45deg - var(--burn-size))) translateZ(100px);
+      }
+
+      50% {
+        transform: rotate(calc(135deg - var(--burn-size))) translateZ(100px);
+      }
+
+      75% {
+        transform: rotate(calc(225deg - var(--burn-size))) translateZ(100px);
+      }
+
+      100% {
+        transform: rotate(315deg) translateZ(100px);
+      }
+    }
+
+    @keyframes fill-wheel {
+      24% {
+        border-top-color: var(--wheel-color);
+      }
+
+      25% {
+        border-top-color: var(--fill-color);
+      }
+
+      49% {
+        border-right-color: var(--wheel-color);
+      }
+
+      50% {
+        border-right-color: var(--fill-color);
+      }
+
+      74% {
+        border-bottom-color: var(--wheel-color);
+      }
+
+      75% {
+        border-bottom-color: var(--fill-color);
+      }
+
+      100% {
+        border-top-color: var(--fill-color);
+        border-right-color: var(--fill-color);
+        border-bottom-color: var(--fill-color);
+      }
+    }
+
+    @keyframes hide-sleeve {
+      49% {
+        border-top-color: var(--wheel-color);
+        border-left-color: var(--wheel-color);
+        border-right-color: transparent;
+      }
+
+      50% {
+        border-top-color: transparent;
+        border-left-color: transparent;
+        border-right-color: var(--fill-color);
+      }
+
+      100% {
+        border-top-color: transparent;
+        border-left-color: transparent;
+        border-right-color: var(--fill-color);
+      }
+    }
+
+    @keyframes burning-color {
+      0% {
+        border-top-color: var(--burn-start-color);
+      }
+
+      100% {
+        border-top-color: var(--burn-end-color);
+      }
+    }
+  </style>
+
+  <script>
+    var size = 200;
+    const wheelsConfig = [
+      {className: 'wheel-1', step: 1, width: 170, holeWidth: 155},
+      {className: 'wheel-2', step: 2, width: 150, holeWidth: 50},
+      {className: 'wheel-3d', step: 1, width: 170, holeWidth: 155, hidden: true}
+    ];
+    const container = document.querySelector('.stamina-wheel-container');
+    const template = document.getElementById('stamina-wheel-template').content.querySelector('.wheel-container');
+
+    container.addEventListener('click', recreateStaminaWheels)
+    document.getElementById('color').addEventListener('input', recreateStaminaWheel);
+    document.getElementById('size').addEventListener('input', recreateStaminaWheels);
+    document.getElementById('speed').addEventListener('input', recreateStaminaWheels);
+    document.getElementById('show-3d-model').addEventListener('click', toggle3dModel);
+    document.getElementById('show-wheel').addEventListener('click', toggle3dModel);
+
+    document.getElementById('info-icon').addEventListener('click', toggleInfoPanel);
+    document.getElementById('back-icon').addEventListener('click', toggleInfoPanel);
+
+    function toggleInfoPanel() {
+      document.querySelector('.main').classList.toggle('hide');
+      document.querySelector('.info-panel').classList.toggle('hide');
+    }
+
+    function recreateStaminaWheels() {
+      for (let i = 0, wheelConfig; wheelConfig = wheelsConfig[i]; i++) {
+        let wheelRoot = container.getElementsByClassName(wheelConfig.className)[0];
+        recreateStaminaWheel(wheelRoot, wheelConfig);
+      }
+    }
+
+    function recreateStaminaWheel(root, wheelConfig) {
+      let color = document.getElementById('color').value;
+      let scale = document.getElementById('size').value / 50;
+      let speed = document.getElementById('speed').value;
+
+      let wheelDom = template.cloneNode(true);
+      root.innerHTML = '';
+      if (wheelConfig.hidden) return;
+      root.appendChild(wheelDom);
+
+      updateWheelConfig(wheelConfig.className, 'step', wheelConfig.step);
+      updateWheelConfig(wheelConfig.className, 'wheel-width', (scale * wheelConfig.width) + 'px');
+      updateWheelConfig(wheelConfig.className, 'wheel-hole-width', (scale * wheelConfig.holeWidth) + 'px');
+      updateWheelConfig(wheelConfig.className, 'width', document.body.clientWidth + 'px');
+      updateWheelConfig(wheelConfig.className, 'height', (size * scale) + 'px');
+      updateWheelConfig(wheelConfig.className, 'speed', speed);
+    }
+
+    function updateWheelConfig(className, name, value) {
+      let styleContainer = document.body;
+      if (name == 'width' || name == 'height') {
+        // This should have been done in CSS with var() but it isn't working
+        // for 'height' for some reason.
+        styleContainer.querySelector('.'+className + ' .wheel-container').style[name] = value;
+        styleContainer.querySelector('.stamina-wheel-container').style[name] = value;
+      }
+
+      let newStyle = document.createElement('style');
+      newStyle.id = 'style-config-' + className + '-' + name;
+      newStyle.innerHTML = `
+        .${className} .wheel {
+          --${name}: ${value};
+        }
+      `;
+
+      let oldStyle = styleContainer.querySelector('#'+newStyle.id);
+      if (oldStyle) {
+        styleContainer.removeChild(oldStyle);
+      }
+      styleContainer.appendChild(newStyle);
+    }
+
+    function toggle3dModel() {
+      document.getElementById('show-3d-model').classList.toggle('hide');
+      document.getElementById('show-wheel').classList.toggle('hide');
+
+      for (let i = 0, wheelConfig; wheelConfig = wheelsConfig[i]; i++) {
+        wheelConfig.hidden = !wheelConfig.hidden;
+      }
+
+      recreateStaminaWheels();
+      document.querySelector('.threeD-container').classList.toggle('animate');
+    }
+
+    recreateStaminaWheels();
+  </script>
+</body>
+</html>
